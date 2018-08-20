@@ -47,7 +47,7 @@
 		                  ;; source: https://groups.google.com/forum/?fromgroups#!topic/clojure/rd-MDXvn3q8
                       :clojure.lang.Named "a keyword or a symbol"
                       :clojure.lang.nil "nil"
-                      :java.io.BufferedReader "a BufferedReader"})
+                      :java.io.BufferedReader "a file or an input stream"})
 
 ;; matching type interfaces to beginner-friendly names.
 ;; Note: since a type may implement more than one interface,
@@ -151,7 +151,7 @@
 ;;; arg-str: non-negative integer as a string -> string
 (defn arg-str
   "arg-str takes a non-negative integer as a string and matches it
-   to the corresponding argument number as a string"
+   to the corresponding argument number as a string, number as adjective"
   [n]
   (let [abs (fn [m] (if (> 0 m) (- m) m))
         n0 (+ 1 (Integer. n))
@@ -190,11 +190,12 @@
 (defn number-arg
   "number-arg takes a positive integer as a string and changes it to a
    string with the numbers corresponding spelling followed by
-   \"argument(s)\""
+   \"argument(s)\", this is the number of arguments"
   [n]
-  (if (= n "1")
-    (str (number-word n) " argument")
-    (str (number-word n) " arguments")))
+  (cond
+    (= n "0") "no arguments"
+    (= n "1") (str (number-word n) " argument")
+    :else (str (number-word n) " arguments")))
 
 (defn number-vals
   "number-vals takes two strings, one which are the arguments that caused
@@ -231,6 +232,7 @@
                                               (if (= x 1)
                                                 (str "one argument")
                                                 (str "no arguments")))
+        (= failedlength "b-length-zero-to-three") (str (number-word (str x)) " arguments")
         :else failedlength))
       "no arguments"))
 
@@ -245,6 +247,7 @@
     "ifn?" "function"
     "fn?" "function"
     "object" "function"
+    "seqable?" "collection"
     (cond
       (= "?" (subs n (- (count n) 1))) (subs n 0 (- (count n) 1))
       (= "\r" (subs n (- (count n) 1))) (?-name (subs n 0 (- (count n) 1)))
@@ -260,6 +263,16 @@
     (= n "anonymous function") "This anonymous function"
     :else (str "The function " n)))
 
+(defn beginandend
+  "beginandend puts (?s) at the beginning of a string and (.*) at the end
+   of a string and turns it into a regex"
+  [x]
+  (re-pattern (str "(?s)" x "(.*)")))
+
+(defn get-spec-text
+  "return the string that failed a given spec from a spec error"
+  [full-error]
+  (nth (re-matches (beginandend #"(.*):args \((.*)\)}, compiling(.*)") full-error) 2))
 
 (defn get-dictionary-type
   "get-dictionary-type takes a string and returns the corresponding type
@@ -294,3 +307,15 @@
    error message so this adds it back in."
   [n]
   (if (= n "") "/" n))
+
+(defn type-and-val
+  "Takes a value (as a string) from a spec error, returns a vector
+  of its type and readable value. Returns \"anonymous function\" as a value
+  when given an anonymous function"
+  [s]
+  (let
+     [t (get-dictionary-type s)]
+     (cond (and (= t "a function ") (= (get-function-name s) "anonymous function")) ["" "an anonymous function"]
+                                  (= t "a function ") [t (get-function-name s)]
+                                  (re-find #"unrecognized type" t) [t ""]
+                                  :else [t s])))
