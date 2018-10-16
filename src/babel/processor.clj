@@ -4,7 +4,8 @@
              [errors.messageobj :as m-obj]
              [errors.prettify-exception :as p-exc]
              [corefns.corefns :as cf]
-             [corefns.instrumentfunctionsfortesting]))
+             [corefns.instrumentfunctionsfortesting]
+             [clojure.tools.nrepl.middleware.session :refer [session]]))
 
 ;;an atom that record original error response
 (def recorder (atom {:msg [] :detail []}))
@@ -29,20 +30,10 @@
   "takes a nREPL response, and returns a message with the errors fixed"
   [inp-message]
   (if (contains? inp-message :err)
-    ;;replace the assoced value with a function call as needed.
-    (assoc inp-message :err
-      (let [err (inp-message :err)
-            processed (p-exc/process-spec-errors err)]
-            (m-obj/get-all-text (:msg-info-obj (do (update-recorder-detail processed)
-                                                   (update-recorder-msg err)
-                                                   processed)))))
-    ;(assoc inp-message :err (str (inp-message :err))) ;; Debugging
-    ;(assoc inp-message :err (str "\n" inp-message "\n" (p-exc/process-spec-errors (inp-message :err)))) ;; Debugging
+    (let [e (session #'*e)]
+      (.getCause e))
     inp-message))
-;  (if (contains? inp-message :err)
-;    ;;replace the assoced value with a function call as needed.
-;    (assoc inp-message :err (m-obj/get-all-text (:msg-info-obj (p-exc/process-spec-errors (inp-message :err)))))
-;    ;(assoc inp-message :err (str (inp-message :err))) ;; Debugging
-;    inp-message))
+;;Exception in thread "nREPL-worker-0" java.lang.IllegalArgumentException: No matching field found: getCause for class clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__1604
+
 
 (println "babel.processor loaded")
