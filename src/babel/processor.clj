@@ -31,9 +31,8 @@
   [inp-message]
   (if (contains? inp-message :err)
     (let [e (session #'*e)]
-      (.getCause e))
+      (assoc inp-message :err e))
     inp-message))
-;;Exception in thread "nREPL-worker-0" java.lang.IllegalArgumentException: No matching field found: getCause for class clojure.tools.nrepl.middleware$wrap_conj_descriptor$fn__1604
 
 
 (println "babel.processor loaded")
