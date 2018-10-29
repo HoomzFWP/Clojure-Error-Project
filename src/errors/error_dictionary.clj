@@ -1,6 +1,7 @@
 (ns errors.error-dictionary
   (:use [errors.messageobj]
-        [errors.dictionaries]))
+        [errors.dictionaries]
+        [errors.messagetemplates]))
 
 ;; A vector of error dictionaries from the most specific one to the most general one.
 ;; Order matters because the vector is searched from top to bottom.
@@ -520,12 +521,12 @@
     {:key :cant-call-nil
     :class "IllegalArgumentException"
     :match (beginandend "Can't call nil")
-    :make-msg-info-obj (fn [matches] (make-msg-info-hashes "You cannot call nil as a function.\n"))}
+    :make-msg-info-obj (fn [matches] (make-msg-info-hashes (you-cannot "call nil as a function")))};;"You cannot call nil as a function.\n"))}
 
     {:key :duplicate-key-hashmap
     :class "IllegalArgumentException"
     :match (beginandend "Duplicate key: (\\S*)")
-    :make-msg-info-obj (fn [matches] (make-msg-info-hashes "You have duplicated the key " (nth matches 1) :arg ", you cannot use the same key in a hashmap twice.\n"))}
+    :make-msg-info-obj (fn [matches] (make-msg-info-hashes (you-cannot "use the same key in a hashmap twice" "you have duplicated the key " (nth matches 1))))};;"You have duplicated the key " (nth matches 1) :arg ", you cannot use the same key in a hashmap twice.\n"))}
 
     {:key :loop-req-vector
     :class "IllegalArgumentException"
