@@ -102,8 +102,10 @@
 
 (s/fdef clojure.core/conj
   :args (s/and ::b-length-greater-zero
-               (s/or :any (s/cat :collection (s/nilable coll?)) ;conj can take anything but the intent of conj is that a single argument will be a collection
-                     :collectionandany (s/cat :collection (s/nilable coll?) :any (s/+ any?)))))
+               (s/or :coll-of (s/coll-of vector? :kind vector? :count 2)
+                     :any (s/cat :collection (s/nilable coll?)) ;conj can take anything but the intent of conj is that a single argument will be a collection
+                     :collectionandany (s/cat :collection (s/nilable coll?) :any (s/+ any?))
+                    )))
 (stest/instrument `clojure.core/conj)
 
 (s/fdef clojure.core/into
