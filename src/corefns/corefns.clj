@@ -25,6 +25,7 @@
                                                (if num2
                                                   (and (>= strc num1) (>= strc num2) (>= num2 num1))
                                                   (>= strc num1))))
+(defn not-map? [coll] (and (coll? coll) (not (map? coll))))
 
 (s/def ::b-length-one b-length1?)
 (s/def ::b-length-two b-length2?)
@@ -47,6 +48,9 @@
 (s/def ::bindings-seq2 (s/and vector? ::binding-seq))
 (s/def ::binding-seq (s/cat :a :clojure.core.specs.alpha/binding-form :b (s/or :a (s/nilable coll?)
                                                                                :b symbol?)))
+
+(s/def ::not-map not-map?)
+
 
 ;##### Specs #####
 (s/fdef clojure.core/+ ;inline issue
@@ -102,9 +106,9 @@
 
 (s/fdef clojure.core/conj
   :args (s/and ::b-length-greater-zero
-               (s/or :coll-of (s/coll-of vector? :kind vector? :count 2)
+               (s/or :map-vec (s/cat :map1 map?) :seq (s/nilable (s/* (s/alt :map2 map? :vec (s/coll-of any? :kind vector? :count 2))))
                      :any (s/cat :collection (s/nilable coll?)) ;conj can take anything but the intent of conj is that a single argument will be a collection
-                     :collectionandany (s/cat :collection (s/nilable coll?) :any (s/+ any?))
+                     :collection (s/cat :collection (s/nilable ::not-map) :any (s/+ any?))
                     )))
 (stest/instrument `clojure.core/conj)
 
@@ -178,6 +182,12 @@
 
 (s/fdef clojure.core/pvalues :args (s/and ::b-length-zero-or-greater (s/cat :a (s/* any?))))
 (stest/instrument `clojure.core/pvalues)
+
+(s/fdef clojure.core/identical? :args (s/and ::b-length-two (s/cat :any1 (s/nilable any?) :any2 (s/nilable any?))))
+(stest/instrument `clojure.core/identical?)
+
+(s/fdef clojure.core/contains? :args (s/and ::b-length-two (s/cat :collection (s/nilable coll?) :key (s/nilable keyword?))))
+(stest/instrument `clojure.core/contains?)
 
 (s/def ::innervector (s/cat :a symbol? :b (s/* (s/cat :a keyword :b (s/or :a symbol?
                                                                           :b (s/nilable coll?))))))
