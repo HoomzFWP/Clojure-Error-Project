@@ -51,6 +51,11 @@
 
 (s/def ::not-map not-map?)
 
+(defn lazy? [lazy-sequence] (or (instance? clojure.lang.IChunkedSeq lazy-sequence)
+                                (instance? clojure.lang.IPending lazy-sequence)))
+
+(s/def ::lazy lazy?)
+
 
 ;##### Specs #####
 (s/fdef clojure.core/+ ;inline issue
@@ -97,7 +102,7 @@
 (stest/instrument `clojure.core/string?)
 
 (s/fdef clojure.core/even?
-  :args ::length-one-number)
+  :args  (s/and ::b-length-one (s/cat :af (s/alt :number number? :lazy ::lazy))))
 (stest/instrument `clojure.core/even?)
 
 (s/fdef clojure.core/odd?
@@ -121,7 +126,7 @@
 
 (s/fdef clojure.core/map
   :args (s/and ::b-length-greater-zero
-               (s/cat :function ifn? :collections (s/* seqable?)))) ;change to a + to block transducers
+               (s/cat :or (s/alt :function ifn? :lazy ::lazy) :collections (s/* seqable?)))) ;change to a + to block transducers
 (stest/instrument `clojure.core/map)
 
 (s/fdef clojure.core/mod
