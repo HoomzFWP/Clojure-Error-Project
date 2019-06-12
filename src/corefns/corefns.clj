@@ -25,7 +25,6 @@
                                                (if num2
                                                   (and (>= strc num1) (>= strc num2) (>= num2 num1))
                                                   (>= strc num1))))
-(defn not-map? [coll] (and (coll? coll) (not (map? coll))))
 
 (s/def ::b-length-one b-length1?)
 (s/def ::b-length-two b-length2?)
@@ -47,14 +46,26 @@
 
 (s/def ::bindings-seq2 (s/and vector? ::binding-seq))
 (s/def ::binding-seq (s/cat :a :clojure.core.specs.alpha/binding-form :b (s/or :a (s/nilable coll?)
-                                                                               :b symbol?)))
+                                                                              :b symbol?)))
 
+
+;#########Lazy functions############
+(defn not-map? [coll] (and (coll? coll) (not (map? coll))))
 (s/def ::not-map not-map?)
 
 (defn lazy? [lazy-sequence] (or (instance? clojure.lang.IChunkedSeq lazy-sequence)
                                 (instance? clojure.lang.IPending lazy-sequence)))
-
 (s/def ::lazy lazy?)
+(s/def ::function-or-lazy (s/alt :function ifn? :lazy ::lazy))
+
+(defn pred? [predicate] (instance? clojure.lang.IFn predicate))
+(defn pred2? [pred] (= (or number? rational? integer? ratio? decimal? float? zero? double? int? nat-int? neg-int? pos-int?
+      keyword? symbol? ident? qualified-ident? qualified-keyword? qualified-symbol? simple-ident? simple-keyword? simple-symbol?
+      string? true? false? nil? some? boolean? bytes? inst? uri? uuid?
+      list? map? set? vector? associative? coll? sequential? seq? empty? indexed? seqable?
+      any?) pred))
+
+(s/def ::predicate pred2?)
 
 
 ;##### Specs #####
@@ -102,7 +113,7 @@
 (stest/instrument `clojure.core/string?)
 
 (s/fdef clojure.core/even?
-  :args  (s/and ::b-length-one (s/cat :af (s/alt :number number? :lazy ::lazy))))
+  :args  (s/and ::b-length-one (s/cat :number number?)))
 (stest/instrument `clojure.core/even?)
 
 (s/fdef clojure.core/odd?
@@ -126,7 +137,8 @@
 
 (s/fdef clojure.core/map
   :args (s/and ::b-length-greater-zero
-               (s/cat :or (s/alt :function ifn? :lazy ::lazy) :collections (s/* seqable?)))) ;change to a + to block transducers
+               (s/cat :or ::function-or-lazy
+                 :collections (s/* seqable?)))) ;change to a + to block transducers
 (stest/instrument `clojure.core/map)
 
 (s/fdef clojure.core/mod
@@ -193,6 +205,9 @@
 
 (s/fdef clojure.core/contains? :args (s/and ::b-length-two (s/cat :collection (s/nilable coll?) :key (s/nilable keyword?))))
 (stest/instrument `clojure.core/contains?)
+
+(s/fdef clojure.core/filter :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::predicate :b (s/alt :coll (s/nilable coll?) :fol ::function-or-lazy))
+                                                                      :second (s/cat :pred ::predicate))))
 
 (s/def ::innervector (s/cat :a symbol? :b (s/* (s/cat :a keyword :b (s/or :a symbol?
                                                                           :b (s/nilable coll?))))))
