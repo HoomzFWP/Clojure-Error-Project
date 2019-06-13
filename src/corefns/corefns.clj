@@ -56,7 +56,10 @@
 (defn lazy? [lazy-sequence] (or (instance? clojure.lang.IChunkedSeq lazy-sequence)
                                 (instance? clojure.lang.IPending lazy-sequence)))
 (s/def ::lazy lazy?)
+
 (s/def ::function-or-lazy (s/alt :function ifn? :lazy ::lazy))
+
+
 
 (defn pred? [predicate] (instance? clojure.lang.IFn predicate))
 (defn pred2? [pred] (= (or number? rational? integer? ratio? decimal? float? zero? double? int? nat-int? neg-int? pos-int?
@@ -165,8 +168,8 @@
 (stest/instrument `clojure.core/denominator)
 
 (s/fdef clojure.core/reduce
-  :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ifn? :a (s/nilable coll?))
-  :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
+  :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
+  :a (s/cat :a ::function-or-lazy :a any? :a (s/nilable coll?)))))
 (stest/instrument `clojure.core/reduce)
 
 (s/fdef clojure.core/get-in :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a (s/nilable coll?) :a (s/nilable coll?))
