@@ -130,7 +130,7 @@
 
 (s/fdef clojure.core/into
   :args (s/and ::b-length-zero-to-three
-               (s/or :c (s/cat :a (s/nilable coll?) :b ifn? :c seqable?)
+               (s/or :c (s/cat :a (s/nilable coll?) :b ::function-or-lazy :c seqable?)
                      :b (s/cat :a (s/nilable coll?) :b seqable?)
                      :a (s/cat :a (s/? seqable?)))))
 (stest/instrument `clojure.core/into)
@@ -165,7 +165,7 @@
 (stest/instrument `clojure.core/denominator)
 
 (s/fdef clojure.core/reduce
-  :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ifn? :a (s/nilable coll?))
+  :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
   :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
 (stest/instrument `clojure.core/reduce)
 
@@ -206,8 +206,15 @@
 (s/fdef clojure.core/contains? :args (s/and ::b-length-two (s/cat :collection (s/nilable coll?) :key (s/nilable keyword?))))
 (stest/instrument `clojure.core/contains?)
 
-(s/fdef clojure.core/filter :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::predicate :b (s/alt :coll (s/nilable coll?) :fol ::function-or-lazy))
-                                                                      :second (s/cat :pred ::predicate))))
+(s/fdef clojure.core/filter
+  :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::function-or-lazy :coll (s/nilable seqable?))
+                                                              :second (s/cat :pred ::function-or-lazy ))))
+(stest/instrument `clojure.core/filter)
+
+(s/fdef clojure.core/comp
+  :args (s/and ::b-length-greater-zero
+            (s/cat :func (s/* any?))))
+(stest/instrument `clojure.core/comp)
 
 (s/def ::innervector (s/cat :a symbol? :b (s/* (s/cat :a keyword :b (s/or :a symbol?
                                                                           :b (s/nilable coll?))))))
