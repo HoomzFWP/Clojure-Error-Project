@@ -57,15 +57,9 @@
                                 (instance? clojure.lang.IPending lazy-sequence)))
 (s/def ::lazy lazy?)
 (s/def ::function-or-lazy (s/alt :function ifn? :lazy ::lazy))
+(s/def ::number-or-lazy (s/alt :num number? :lazy ::lazy))
+(s/def ::map-vec-or-lazy (s/alt :or (s/alt :map map? :vector vector?) :lazy ::lazy))
 
-(defn pred? [predicate] (instance? clojure.lang.IFn predicate))
-(defn pred2? [pred] (= (or number? rational? integer? ratio? decimal? float? zero? double? int? nat-int? neg-int? pos-int?
-      keyword? symbol? ident? qualified-ident? qualified-keyword? qualified-symbol? simple-ident? simple-keyword? simple-symbol?
-      string? true? false? nil? some? boolean? bytes? inst? uri? uuid?
-      list? map? set? vector? associative? coll? sequential? seq? empty? indexed? seqable?
-      any?) pred))
-
-(s/def ::predicate pred2?)
 
 
 ;##### Specs #####
@@ -160,10 +154,6 @@
                      :b (s/cat :str2 string? :int2 int? :int3 int?)))) ;(s/and (s/cat :str2 string? :int2 int? :int3 int?) (fn [{:keys [str2 int2 int3]}] (b-not-greater-count str2 int2 int3))))))
 (stest/instrument `clojure.core/subs)
 
-(s/fdef clojure.core/denominator
-  :args (s/or :a (s/cat :a ratio?)))
-(stest/instrument `clojure.core/denominator)
-
 (s/fdef clojure.core/reduce
   :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
   :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
@@ -210,6 +200,26 @@
   :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::function-or-lazy :coll (s/nilable seqable?))
                                                               :second (s/cat :pred ::function-or-lazy ))))
 (stest/instrument `clojure.core/filter)
+
+(s/fdef clojure.core/take
+  :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                           :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take)
+
+(s/fdef clojure.core/drop :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                                                   :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/drop)
+
+(s/fdef clojure.core/remove :args (s/and ::b-length-one-to-two (s/or :first (s/cat :fn ::function-or-lazy)
+                                                                     :second (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/remove)
+
+(s/fdef clojure.core/group-by :args (s/and ::b-length-two (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?))))
+(stest/instrument `clojure.core/group-by)
+
+(s/fdef clojure.core/replace :args (s/and ::b-length-one-to-two (s/cat :first (s/cat :map-v ::map-vec-or-lazy)
+                                                                       :second (s/cat :map-v ::map-vec-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/replace)
 
 (s/fdef clojure.core/comp
   :args (s/and ::b-length-greater-zero
