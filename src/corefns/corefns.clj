@@ -61,21 +61,6 @@
 (s/def ::number-or-lazy (s/alt :num number? :lazy ::lazy))
 (s/def ::map-vec-or-lazy (s/alt :or (s/alt :map map? :vector vector?) :lazy ::lazy))
 
-<<<<<<< HEAD
-
-
-(defn pred? [predicate] (instance? clojure.lang.IFn predicate))
-(defn pred2? [pred] (= (or number? rational? integer? ratio? decimal? float? zero? double? int? nat-int? neg-int? pos-int?
-      keyword? symbol? ident? qualified-ident? qualified-keyword? qualified-symbol? simple-ident? simple-keyword? simple-symbol?
-      string? true? false? nil? some? boolean? bytes? inst? uri? uuid?
-      list? map? set? vector? associative? coll? sequential? seq? empty? indexed? seqable?
-      any?) pred))
-
-(s/def ::predicate pred2?)
-=======
->>>>>>> 6f1b753cd0af8381fae1d8d011f8ecc971007f3f
-
-
 ;##### Specs #####
 (s/fdef clojure.core/+ ;inline issue
   :args (s/cat :checknum (s/* number?)))
@@ -170,11 +155,7 @@
 
 (s/fdef clojure.core/reduce
   :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
-<<<<<<< HEAD
   :a (s/cat :a ::function-or-lazy :a any? :a (s/nilable coll?)))))
-=======
-  :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
->>>>>>> 6f1b753cd0af8381fae1d8d011f8ecc971007f3f
 (stest/instrument `clojure.core/reduce)
 
 (s/fdef clojure.core/get-in :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a (s/nilable coll?) :a (s/nilable coll?))
