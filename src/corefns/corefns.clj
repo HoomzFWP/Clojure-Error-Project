@@ -30,7 +30,7 @@
                                                (if num2
                                                   (and (>= strc num1) (>= strc num2) (>= num2 num1))
                                                   (>= strc num1))))
-(defn not-zero? [number] (and (number? number) (or  (not (neg? number)) (not (zero? number)))));;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn greater-than-zero? [number] (< 0 number))
 
 (s/def ::b-length-one b-length1?)
 (s/def ::b-length-two b-length2?)
@@ -69,7 +69,7 @@
 (s/def ::number-or-lazy (s/alt :num number? :lazy ::lazy))
 (s/def ::string-or-lazy (s/alt :num string? :lazy ::lazy))
 (s/def ::map-vec-or-lazy (s/alt :or (s/alt :map map? :vector vector?) :lazy ::lazy))
-(s/def ::not-zero (s/and ::number-or-lazy not-zero?))
+(s/def ::greater-than-zero greater-than-zero?)
 
 (defn regex2? [regex] (instance? java.util.regex.Pattern regex))
 
@@ -217,8 +217,8 @@
                                            :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/take)
 
-(s/fdef clojure.core/take-nth :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
-                                                                       :second (s/cat :and ::not-zero :coll (s/nilable seqable?)))))
+(s/fdef clojure.core/take-nth :args (s/and ::b-length-one-to-two (s/or :second (s/cat :and ::greater-than-zero :coll (s/nilable seqable?))
+                                                                       :first (s/cat :num ::number-or-lazy))))
 (stest/instrument `clojure.core/take-nth)
 
 (s/fdef clojure.core/take-last :args (s/and ::b-length-one-to-two (s/cat :num ::number-or-lazy :coll (s/nilable seqable?))))
@@ -277,9 +277,9 @@
           :third  (s/cat :num ::number-or-lazy :step ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/partition-all)
 
-(s/fdef clojure.core/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re regex2?)
+(s/fdef clojure.string/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re regex2?)
                                                                       :second (s/cat :string ::string-or-lazy :re regex2? :num ::number-or-lazy))))
-(stest/instrument `clojure.core/split)
+(stest/instrument `clojure.string/split)
 
 
 
