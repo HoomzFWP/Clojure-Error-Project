@@ -206,9 +206,24 @@
                                            :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/take)
 
+(s/fdef clojure.core/take-nth :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                                                       :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take-nth)
+
+(s/fdef clojure.core/take-last :args (s/and ::b-length-one-to-two (s/cat :num ::number-or-lazy :coll (s/nilable seqable?))))
+(stest/instrument `clojure.core/take-last)
+
+(s/fdef clojure.core/take-while :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::function-or-lazy)
+                                                                       :second (s/cat :num ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take-while)
+
 (s/fdef clojure.core/drop :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
                                                                    :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/drop)
+
+(s/fdef clojure.core/drop-last :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num (s/nilable seqable?))
+                                                                   :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/drop-last)
 
 (s/fdef clojure.core/remove :args (s/and ::b-length-one-to-two (s/or :first (s/cat :fn ::function-or-lazy)
                                                                      :second (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?)))))
@@ -217,9 +232,13 @@
 (s/fdef clojure.core/group-by :args (s/and ::b-length-two (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?))))
 (stest/instrument `clojure.core/group-by)
 
-(s/fdef clojure.core/replace :args (s/and ::b-length-one-to-two (s/cat :first (s/cat :map-v ::map-vec-or-lazy)
-                                                                       :second (s/cat :map-v ::map-vec-or-lazy :coll (s/nilable seqable?)))))
+(s/fdef clojure.core/replace :args (s/and ::b-length-one-to-two (s/or :first (s/cat :map-v ::map-vec-or-lazy)
+                                                                      :second (s/cat :map-v ::map-vec-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/replace)
+
+(s/fdef clojure.core/keep :args (s/and ::b-length-one-to-two (s/or :first (s/cat :fn ::function-or-lazy)
+                                                                   :second (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/keep)
 
 (s/fdef clojure.core/comp
   :args (s/and ::b-length-greater-zero
