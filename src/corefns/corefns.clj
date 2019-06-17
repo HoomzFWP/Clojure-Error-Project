@@ -64,6 +64,7 @@
 (defn lazy? [lazy-sequence] (or (instance? clojure.lang.IChunkedSeq lazy-sequence)
                                 (instance? clojure.lang.IPending lazy-sequence)))
 (s/def ::lazy lazy?)
+
 (s/def ::function-or-lazy (s/alt :function ifn? :lazy ::lazy))
 (s/def ::number-or-lazy (s/alt :num number? :lazy ::lazy))
 (s/def ::string-or-lazy (s/alt :num string? :lazy ::lazy))
@@ -71,8 +72,6 @@
 (s/def ::not-zero (s/and ::number-or-lazy not-zero?))
 
 (defn regex2? [regex] (instance? java.util.regex.Pattern regex))
-
-
 
 ;##### Specs #####
 (s/fdef clojure.core/+ ;inline issue
@@ -168,7 +167,7 @@
 
 (s/fdef clojure.core/reduce
   :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
-  :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
+  :a (s/cat :a ::function-or-lazy :a any? :a (s/nilable coll?)))))
 (stest/instrument `clojure.core/reduce)
 
 (s/fdef clojure.core/get-in :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a (s/nilable coll?) :a (s/nilable coll?))
