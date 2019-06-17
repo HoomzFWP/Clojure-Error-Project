@@ -277,9 +277,9 @@
           :third  (s/cat :num ::number-or-lazy :step ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/partition-all)
 
-(s/fdef clojure.core/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re regex2?)
+(s/fdef clojure.string/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re regex2?)
                                                                       :second (s/cat :string ::string-or-lazy :re regex2? :num ::number-or-lazy))))
-(stest/instrument `clojure.core/split)
+(stest/instrument `clojure.string/split)
 
 
 
