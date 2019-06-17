@@ -58,7 +58,10 @@
 (s/def ::lazy lazy?)
 
 (s/def ::function-or-lazy (s/alt :function ifn? :lazy ::lazy))
+(s/def ::number-or-lazy (s/alt :num number? :lazy ::lazy))
+(s/def ::map-vec-or-lazy (s/alt :or (s/alt :map map? :vector vector?) :lazy ::lazy))
 
+<<<<<<< HEAD
 
 
 (defn pred? [predicate] (instance? clojure.lang.IFn predicate))
@@ -69,6 +72,8 @@
       any?) pred))
 
 (s/def ::predicate pred2?)
+=======
+>>>>>>> 6f1b753cd0af8381fae1d8d011f8ecc971007f3f
 
 
 ;##### Specs #####
@@ -133,7 +138,7 @@
 
 (s/fdef clojure.core/into
   :args (s/and ::b-length-zero-to-three
-               (s/or :c (s/cat :a (s/nilable coll?) :b ifn? :c seqable?)
+               (s/or :c (s/cat :a (s/nilable coll?) :b ::function-or-lazy :c seqable?)
                      :b (s/cat :a (s/nilable coll?) :b seqable?)
                      :a (s/cat :a (s/? seqable?)))))
 (stest/instrument `clojure.core/into)
@@ -163,13 +168,13 @@
                      :b (s/cat :str2 string? :int2 int? :int3 int?)))) ;(s/and (s/cat :str2 string? :int2 int? :int3 int?) (fn [{:keys [str2 int2 int3]}] (b-not-greater-count str2 int2 int3))))))
 (stest/instrument `clojure.core/subs)
 
-(s/fdef clojure.core/denominator
-  :args (s/or :a (s/cat :a ratio?)))
-(stest/instrument `clojure.core/denominator)
-
 (s/fdef clojure.core/reduce
   :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a ::function-or-lazy :a (s/nilable coll?))
+<<<<<<< HEAD
   :a (s/cat :a ::function-or-lazy :a any? :a (s/nilable coll?)))))
+=======
+  :a (s/cat :a ifn? :a any? :a (s/nilable coll?)))))
+>>>>>>> 6f1b753cd0af8381fae1d8d011f8ecc971007f3f
 (stest/instrument `clojure.core/reduce)
 
 (s/fdef clojure.core/get-in :args (s/and ::b-length-two-to-three (s/or :a (s/cat :a (s/nilable coll?) :a (s/nilable coll?))
@@ -209,8 +214,54 @@
 (s/fdef clojure.core/contains? :args (s/and ::b-length-two (s/cat :collection (s/nilable coll?) :key (s/nilable keyword?))))
 (stest/instrument `clojure.core/contains?)
 
-(s/fdef clojure.core/filter :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::predicate :b (s/alt :coll (s/nilable coll?) :fol ::function-or-lazy))
-                                                                      :second (s/cat :pred ::predicate))))
+(s/fdef clojure.core/filter
+  :args (s/and ::b-length-one-to-two (s/or :first (s/cat :pred ::function-or-lazy :coll (s/nilable seqable?))
+                                                              :second (s/cat :pred ::function-or-lazy ))))
+(stest/instrument `clojure.core/filter)
+
+(s/fdef clojure.core/take
+  :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                           :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take)
+
+(s/fdef clojure.core/take-nth :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                                                       :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take-nth)
+
+(s/fdef clojure.core/take-last :args (s/and ::b-length-one-to-two (s/cat :num ::number-or-lazy :coll (s/nilable seqable?))))
+(stest/instrument `clojure.core/take-last)
+
+(s/fdef clojure.core/take-while :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::function-or-lazy)
+                                                                       :second (s/cat :num ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/take-while)
+
+(s/fdef clojure.core/drop :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num ::number-or-lazy)
+                                                                   :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/drop)
+
+(s/fdef clojure.core/drop-last :args (s/and ::b-length-one-to-two (s/or :first (s/cat :num (s/nilable seqable?))
+                                                                   :second (s/cat :num ::number-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/drop-last)
+
+(s/fdef clojure.core/remove :args (s/and ::b-length-one-to-two (s/or :first (s/cat :fn ::function-or-lazy)
+                                                                     :second (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/remove)
+
+(s/fdef clojure.core/group-by :args (s/and ::b-length-two (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?))))
+(stest/instrument `clojure.core/group-by)
+
+(s/fdef clojure.core/replace :args (s/and ::b-length-one-to-two (s/or :first (s/cat :map-v ::map-vec-or-lazy)
+                                                                      :second (s/cat :map-v ::map-vec-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/replace)
+
+(s/fdef clojure.core/keep :args (s/and ::b-length-one-to-two (s/or :first (s/cat :fn ::function-or-lazy)
+                                                                   :second (s/cat :fn ::function-or-lazy :coll (s/nilable seqable?)))))
+(stest/instrument `clojure.core/keep)
+
+(s/fdef clojure.core/comp
+  :args (s/and ::b-length-greater-zero
+            (s/cat :func (s/* any?))))
+(stest/instrument `clojure.core/comp)
 
 (s/def ::innervector (s/cat :a symbol? :b (s/* (s/cat :a keyword :b (s/or :a symbol?
                                                                           :b (s/nilable coll?))))))
