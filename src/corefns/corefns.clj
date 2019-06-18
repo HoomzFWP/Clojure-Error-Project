@@ -72,6 +72,7 @@
 (s/def ::greater-than-zero greater-than-zero?)
 
 (defn regex2? [regex] (instance? java.util.regex.Pattern regex))
+(s/def ::regex-or-lazy (s/alt :regex regex2? :lazy ::lazy))
 
 ;##### Specs #####
 (s/fdef clojure.core/+ ;inline issue
@@ -118,7 +119,7 @@
 (stest/instrument `clojure.core/string?)
 
 (s/fdef clojure.core/even?
-  :args  (s/and ::b-length-one (s/cat :number number?)))
+  :args  ::length-one-number)
 (stest/instrument `clojure.core/even?)
 
 (s/fdef clojure.core/odd?
@@ -277,8 +278,8 @@
           :third  (s/cat :num ::number-or-lazy :step ::number-or-lazy :coll (s/nilable seqable?)))))
 (stest/instrument `clojure.core/partition-all)
 
-(s/fdef clojure.string/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re regex2?)
-                                                                      :second (s/cat :string ::string-or-lazy :re regex2? :num ::number-or-lazy))))
+(s/fdef clojure.string/split :args (s/and ::b-length-two-to-three (s/or :first (s/cat :string ::string-or-lazy :re ::regex-or-lazy)
+                                                                      :second (s/cat :string ::string-or-lazy :re ::regex-or-lazy :num ::number-or-lazy))))
 (stest/instrument `clojure.string/split)
 
 
