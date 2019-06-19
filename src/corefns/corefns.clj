@@ -149,7 +149,7 @@
 
 (s/fdef clojure.core/mod
   :args (s/and ::b-length-two
-               (s/cat :number number? :number (s/and number? ::b-not-zero)))) ;(fn [{:keys [a b]}] (not= b 0))))
+               (s/cat :number ::number-or-lazy :number (s/and ::number-or-lazy ::b-not-zero)))) ;(fn [{:keys [a b]}] (not= b 0))))
 (stest/instrument `clojure.core/mod)
 
 (s/fdef clojure.core/numerator
@@ -162,8 +162,8 @@
 
 (s/fdef clojure.core/subs ;incomplete
   :args (s/and ::b-length-two-to-three
-               (s/or :a (s/cat :str1 string? :int1 int?) ;(s/and (s/cat :str1 string? :int1 int?) (fn [{:keys [str1 int1]}] (b-not-greater-count str1 int1)))
-                     :b (s/cat :str2 string? :int2 int? :int3 int?)))) ;(s/and (s/cat :str2 string? :int2 int? :int3 int?) (fn [{:keys [str2 int2 int3]}] (b-not-greater-count str2 int2 int3))))))
+               (s/or :a (s/cat :str1 ::string-or-lazy :int1 int?) ;(s/and (s/cat :str1 string? :int1 int?) (fn [{:keys [str1 int1]}] (b-not-greater-count str1 int1)))
+                     :b (s/cat :str2 ::string-or-lazy :int2 int? :int3 int?)))) ;(s/and (s/cat :str2 string? :int2 int? :int3 int?) (fn [{:keys [str2 int2 int3]}] (b-not-greater-count str2 int2 int3))))))
 (stest/instrument `clojure.core/subs)
 
 (s/fdef clojure.core/reduce
@@ -282,21 +282,10 @@
                                                                       :second (s/cat :string ::string-or-lazy :re ::regex-or-lazy :num ::number-or-lazy))))
 (stest/instrument `clojure.string/split)
 
-
-
-
-
-
-
-
-
-
-
 (s/fdef clojure.core/comp
   :args (s/and ::b-length-greater-zero
             (s/cat :func (s/* any?))))
 (stest/instrument `clojure.core/comp)
-
 
 (s/def ::innervector (s/cat :a symbol? :b (s/* (s/cat :a keyword :b (s/or :a symbol?
                                                                           :b (s/nilable coll?))))))
